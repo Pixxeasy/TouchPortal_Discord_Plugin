@@ -41,7 +41,8 @@ let discord_voice_channel_server_name = '<None>';
 let discord_voice_channel_server_id = '<None>';
 let discord_voice_average_ping = '0.00';
 let discord_voice_hostname = '<None>';
-let discord_voice_volume = '0.00';
+let discord_voice_input_volume = '0.00';
+let discord_voice_output_volume = '0.00';
 let discord_voice_mode_type = 'UNKNOWN';
 let guilds = {};
 let channels = {};
@@ -102,6 +103,40 @@ TPClient.on("Action", async (message) => {
       DiscordClient.setVoiceSettings({'mode':{'type':modeType}});
     }
   }
+  else if (message.actionId === 'discord_volume_action'){
+
+      if(message.data[0].id === "discordVolumeType" && message.data[1].id === "discordVolume"){
+          let type = message.data[0].value
+
+          let volume = parseInt(message.data[1].value)
+
+          let maxVolume = {Input: 100, Output: 200}
+
+          if(type === "Input"){
+            finalVolume = parseInt(discord_voice_input_volume)
+          }
+          else if(type === "Output"){
+            finalVolume = parseInt(discord_voice_output_volume)
+          }
+
+          logIt("FinalVolume", finalVolume)
+
+          if(((finalVolume + volume)) >= 0 && ((finalVolume + volume) <= maxVolume[type])){
+              finalVolume += volume
+          }
+
+          logIt("FinalVolume", finalVolume)
+          
+          if(type === "Input"){
+            DiscordClient.setVoiceSettings({'input': {'volume': finalVolume}})
+          }
+          else if(type === "Output"){
+            DiscordClient.setVoiceSettings({'output': {'volume': finalVolume}})
+          }
+        
+      }
+  }
+
   else if (message.data && message.data.length > 0) {
     if (message.data[0].id === "discordDeafenAction") {
       if (message.data[0].value === "Toggle") {
@@ -248,7 +283,10 @@ const connectToDiscord = function () {
     }
 
     if( data.input.volume > -1) {
-      discord_voice_volume = data.input.volume.toFixed(2);
+      discord_voice_input_volume = data.input.volume.toFixed(2);
+    }
+    if(data.output.volume > -1) {
+      discord_voice_output_volume = data.output.volume.toFixed(2);
     }
     if( data.mode.type != '') {
       logIt("DEBUG","voice mode is",data.mode.type);
@@ -258,7 +296,44 @@ const connectToDiscord = function () {
     let states = [
       { id: "discord_mute", value: muteState ? "On" : "Off" },
       { id: "discord_deafen", value: deafState ? "On" : "Off" },
-      { id: "discord_voice_volume", value: discord_voice_volume },
+      { id: "discord_voice_input_volume", value: discord_voice_input_volume },
+      { id: "discord_voice_output_volume", value: discord_voice_output_volume },
+      { id: "discord_voice_mode_type", value: discord_voice_mode_type }
+    ];
+    TPClient.stateUpdateMany(states);
+  };
+
+  getVoiceSettings = async () => {
+    let data = await DiscordClient.getVoiceSettings();
+
+    if (data.mute) {
+      muteState = 1;
+    } else {
+      muteState = 0;
+    }
+    if (data.deaf) {
+      deafState = 1;
+      muteState = 1;
+    } else {
+      deafState = 0;
+    }
+
+    if( data.input.volume > -1) {
+      discord_voice_input_volume = data.input.volume.toFixed(2);
+    }
+    if(data.output.volume > -1) {
+      discord_voice_output_volume = data.output.volume.toFixed(2);
+    }
+    if( data.mode.type != '') {
+      logIt("DEBUG","voice mode is",data.mode.type);
+      discord_voice_mode_type = data.mode.type;
+    }
+
+    let states = [
+      { id: "discord_mute", value: muteState ? "On" : "Off" },
+      { id: "discord_deafen", value: deafState ? "On" : "Off" },
+      { id: "discord_voice_input_volume", value: discord_voice_input_volume },
+      { id: "discord_voice_output_volume", value: discord_voice_output_volume },
       { id: "discord_voice_mode_type", value: discord_voice_mode_type }
     ];
     TPClient.stateUpdateMany(states);
@@ -439,6 +514,7 @@ const connectToDiscord = function () {
     await DiscordClient.subscribe("VOICE_CONNECTION_STATUS");
 
     getGuilds();
+    getVoiceSettings();
     
   });
   DiscordClient.on('VOICE_SETTINGS_UPDATE', (data) => {
