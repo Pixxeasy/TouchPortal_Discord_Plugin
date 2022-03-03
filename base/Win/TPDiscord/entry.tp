@@ -180,6 +180,35 @@
                    "type":"communicate",
                    "tryInline":"true",
                    "format":"Discord: Store Push To Talk Keys"
+                },
+                {
+                    "id": "discord_volume_action",
+                    "prefix": "Discord:",
+                    "name": "Discord Volume",
+                    "type": "communicate",
+                    "tryInline": "true",
+                    "format": "Discord: Change {$discordVolumeType$} Volume: {$discordVolume$}",
+                    "data":[
+                        {
+                            "id": "discordVolumeType",
+                            "type": "choice",
+                            "label": "Volume Type Action",
+                            "default": "",
+                            "valueChoices":[
+                                "Input",
+                                "Output"
+                            ]
+                        }
+                        ,{
+                            "id": "discordVolume",
+                            "type": "number",
+                            "label": "Volume Action",
+                            "default": 0,
+                            "allowDecimals": "false",
+                            "minValue": -100,
+                            "maxValue": 100
+                        }
+                    ]
                 }
             ],
             "states": [
@@ -258,6 +287,18 @@
                         "PUSH_TO_TALK",
                         "VOICE_ACTIVITY"
                     ]
+                },
+                {
+                    "id": "discord_voice_input_volume",
+                    "type": "text",
+                    "desc": "Discord Voice Input Volume",
+                    "default": "0.00"
+                },
+                {
+                    "id": "discord_voice_output_volume",
+                    "type": "text",
+                    "desc": "Discord Voice Output Volume",
+                    "default": "0.00"
                 }
             ],
             "events": []
