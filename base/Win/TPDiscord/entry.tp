@@ -301,7 +301,32 @@
                     "default": "0.00"
                 }
             ],
-            "events": []
+            "events": [
+                {
+                    "id": "discord_mute_event",
+                    "name": "When Mute State Changes",
+                    "format": "When Mute State is $val",
+                    "type": "communicate",
+                    "valueChoices": [
+                        "On",
+                        "Off"
+                    ],
+                    "valueType": "choice",
+                    "valueStateId": "discord_mute"
+                },
+                {
+                    "id": "discord_deafen_event",
+                    "name": "When Deafen State Changes",
+                    "format": "When Deafen State is $val",
+                    "type": "communicate",
+                    "valueChoices": [
+                        "On",
+                        "Off"
+                    ],
+                    "valueType": "choice",
+                    "valueStateId": "discord_deafen"
+                }
+            ]
         }
     ]
 }
