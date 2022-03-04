@@ -251,6 +251,18 @@ TPClient.on("Update", (curVersion, newVersion) => {
   logIt("DEBUG",curVersion, newVersion);
 });
 
+TPClient.on("Broadcast", (data) => {
+  if( data.event == "pageChange"){
+
+    let states = [
+      { id: "discord_mute", value: muteState ? "On" : "Off" },
+      { id: "discord_deafen", value: deafState ? "On" : "Off" }
+    ]
+
+    TPClient.stateUpdateMany(states);
+  }
+});
+
 TPClient.on("Close", (data) => {
   logIt("WARN","Closing due to TouchPortal sending closePlugin message");
   TPClient.settingUpdate(PLUGIN_CONNECTED_SETTING,"Disconnected");
